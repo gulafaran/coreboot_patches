@@ -1,0 +1,56 @@
+From f4120d87cfcc63f2265fa6fe81261351162e529a Mon Sep 17 00:00:00 2001
+From: Tom Englund <tomenglund26@gmail.com>
+Date: Mon, 14 Dec 2020 16:02:21 +0100
+Subject: [PATCH] fix vbt signature in fhd data.vbt
+
+---
+ .../lenovo/x230/variants/x230_fhd/data.vbt    | Bin 3986 -> 4281 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+diff --git a/src/mainboard/lenovo/x230/variants/x230_fhd/data.vbt b/src/mainboard/lenovo/x230/variants/x230_fhd/data.vbt
+index 1aaf54226c937b0e63b6062c1a4ed3b49e61e858..13384d45571ff76e592335143d01315e37893186 100644
+GIT binary patch
+delta 1516
+zcmcJOU1%It6vzK}XLje#osUc>v5jdHPd*BpHZim7Qfvg7Caq>m8WY<_5s^f<#%ifr
+zQ)%#H7u0G|r16&MOQkP`B0i{vpkPHrOAwW|U={J95g(*Jm>1C(8_#TZA&7z?p5Zs=
+zKj;4M<$ld;H+<0E+BH6~hjxz)^cBYkdUxG1P#oStB}8~Xm_ei$MdNG~M5nP9F9p}G
+z0wp1uyojTCaC+Z??48}Td-7mu=Ke$bOH=#$ichYn*#nz96BCUNQm%00O$DM{)R)Wm
+z<)d7VD4**uZ0XMzX3s_I1|NNF=FtABho&hz*iCuv)SH-eT4c+RrT|154FbacBM(~&
+zSDHgI&PqxPbDN0U1#LHD&!inOl_ZJ+-6n=(bP;-h04YzTOrTxj{1F6!*rY(<uz^gH
+ztw@lO2oskl5<{kDuz=0!sv{7@vjAdTsydo$4w-b~ut-o!Ura~(;nZ5aB%Hs={pC;C
+zSsf-xA_>435yq@G45<bjHL^Hsq;Sr-8I$G$-pxe#G1H7?rp0PTr~+(M5)pF?(<&t<
+zWr!!37ns+Xx23{7^D*-|^9{4e{4CY&_?3laE39GGGaH#cW-Bwu>|*X>CYeW=!%Ueu
+z#%SgwlR2!%jY6ZnR9!e!EjvplufJEnXAD1JPw+zX{QQ6Kv)7E%;`)m9j=2~3<weiH
+zZ^nXeLv&>B!Lu3tVS292yBh<1L@C~HGdU<BA!5D}AfUocCS(laA|YlCgIh%feB(?B
+zGlrRh6jfWbiOn*FSRj^(pAAWco2qw-2ayD-fMUdiioTd>=bxud2Uc1?V-@&XWb{d^
+z=^t{l5PIHPN__!+K_1a$kCuVu<qcbK*{&R?E3JW?=s-2v{!OK|zzY>p*rpo~QFf&#
+z&$eDlq_AZwZMv&v+nVH0tA?JksZ1=pPrz^;$~)n9M~yf%?Sw}ib=;wOCtPsUC5L`@
+zLglI^m-^js*j3{$J?)0Cy6O#=K61kguKLa;cwy+N4IT}6;T})j=h5?CIOnNT9-a5X
+zZ$0&cN74^leAVUCPCvZYR}cE@=@mbG(^qGF`pOTl`0A=pK||Qlpn4i~yJ|8&wdbI>
+zs#{mYQ*|-sb&6)as9IL)+ngrd=xnNg)ZEWGHSt+pSZ=LStc#cH;>)^7#_IHHV~u&W
+z4!SPBu8Vd4a`|y&M!tt}_ggFPovZZf`hU^Oe~F&!aO^fdv?3I|y%<FaJz@?&8Tb<g
+Co-A1a
+
+delta 1290
+zcmbV~UuYaf9LImNGq*cCyK~vDZJJbCCo0XwB<)-_jWx!4O>%8o>A%#<Su7?su}!H>
+z2oam7OGOBx6|N(B@Wm*IkO%*us6_}-K~8*;2>KFA3Pn(aMnpxWp1)0RF-Y;jh0pxH
+z?C(2Yc7C&$8!p|k`R+%$A67?qAMAa!yMJHr-hAr;rG`L5siqUOxk_#;>7eB`sD;6r
+zzkUE1A|#Y;dgp!n&P@!T&Ga`N9XvNQd2)PY=+v+}FnV(2Y-y}{Yj1aK*`W^isBHVT
+zs9mY7-X7`gZ91!!(otu7)EPykd0huRqhpifBd1PJs7z0jYSUV`;u4t@$rLGP06<dU
+zkQ{Muv_UV++01eY2#foSQ(~nElZ1K1atPZ%Se~#n<9k>xqj+DA2VhBJVMqgq&(A{;
+z5X@5uxBzxsK@&ye%HW%UwFU>EITbe`AS&Jlxqmr$yeWPZQI;9BwK-$enib;RqIMSF
+zLgQ*oyrZhpM8l`{7C25bFikBe(VehJ%W$Wy;h0?qW5^50OAd!cCxmOruL$QMY~}(Q
+zkt}jQ(uedTk0DPY=aFZT7m*n*BA7)nhrEx>BV}X}Swg-;R**js<_bt7_6c)_wwn*=
+z#CsRn8>Bw|>|+3x3zEWbw48Q<nACB&o-z;FGn;T2csj!4kuZ+4f*g-0tvLQewTC#+
+zTRJckTQ_&2vM_>GBmS#p2Al@pg%se`trm09*_fpjpv%PR%6YJ$m)8e%eH~D^f;m7d
+z3$$Q4UFCHPkS)|HH4t|KbKN<D7iOC)&U%yMjDX4W6{`$pw>x7VcZK=Z&6sJiu{et%
+zO)mre#Z|Y9uvLhAg*qX^Q6VOUdR2t)3h}W}S4H@<5I2On%L{jS;z3Uhd*L&lxZtTb
+zz3{RpKJ(P~UihacQod^T!v}n^*H=&ZVbK@Q`|52!{KOYu`syb?q*6$!A{pkTI3y$W
+zv<#=EC`t9948M@#YpH&hp_djL((;}aHf1f7sdZ^QD9&@-hmX7#Vh($|*s8eX?b`E|
+z(?Wdg#5KU0s%eBu<(<aasUy#A(pq(Zo(}-(JBl<80YD3|IJ0YQX02b%EF|KUL@Xs@
+zi>!JE67hN>t|ek?y6QQdh`B`kn22pPl_v(lKDY!>n7g^|&lA-97yo&)w)_9InGNdy
+E2HOt)`Tzg`
+
+-- 
+2.29.2
+

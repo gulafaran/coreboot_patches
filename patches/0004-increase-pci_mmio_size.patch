@@ -1,0 +1,25 @@
+From 7c583486a1b7815d770eae5a2a611169cae11209 Mon Sep 17 00:00:00 2001
+From: Tom Englund <tomenglund26@gmail.com>
+Date: Mon, 14 Dec 2020 16:12:07 +0100
+Subject: [PATCH] increase pci_mmio_size to reduce BSOD page faults in windows
+
+---
+ src/mainboard/lenovo/x230/devicetree.cb | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mainboard/lenovo/x230/devicetree.cb b/src/mainboard/lenovo/x230/devicetree.cb
+index 27d42b68be..b4a0f9d4dd 100644
+--- a/src/mainboard/lenovo/x230/devicetree.cb
++++ b/src/mainboard/lenovo/x230/devicetree.cb
+@@ -31,7 +31,7 @@ chip northbridge/intel/sandybridge
+ 		end
+ 	end
+ 
+-	register "pci_mmio_size" = "1024"
++	register "pci_mmio_size" = "2048"
+ 
+ 	device domain 0 on
+ 		subsystemid 0x17aa 0x21fa inherit
+-- 
+2.29.2
+

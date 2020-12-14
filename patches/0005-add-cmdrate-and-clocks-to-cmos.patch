@@ -1,0 +1,197 @@
+From 6d50618f0cc5a57d4d4c252d5adcb0b27b76751e Mon Sep 17 00:00:00 2001
+From: Tom Englund <tomenglund26@gmail.com>
+Date: Mon, 14 Dec 2020 21:05:32 +0100
+Subject: [PATCH] add cmos options for ram settings
+
+---
+ src/mainboard/lenovo/x230/cmos.default        |  5 ++++
+ src/mainboard/lenovo/x230/cmos.layout         | 15 ++++++++++
+ src/northbridge/intel/sandybridge/raminit.c   |  8 ++++++
+ .../intel/sandybridge/raminit_common.c        | 28 +++++++++++++++++--
+ .../intel/sandybridge/raminit_native.c        | 17 +++++++++++
+ 5 files changed, 70 insertions(+), 3 deletions(-)
+
+diff --git a/src/mainboard/lenovo/x230/cmos.default b/src/mainboard/lenovo/x230/cmos.default
+index 5c19d0f4a5..c680cba3bc 100644
+--- a/src/mainboard/lenovo/x230/cmos.default
++++ b/src/mainboard/lenovo/x230/cmos.default
+@@ -15,3 +15,8 @@ trackpoint=Enable
+ backlight=Both
+ usb_always_on=Disable
+ f1_to_f12_as_primary=Enable
++gfx_uma_size=224M
++max_mem_clock=800MHZ
++mem_cmdrate=Auto
++mem_srt=Enable
++force_mem_training=Disable
+diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
+index 89891bf0b0..41d819410d 100644
+--- a/src/mainboard/lenovo/x230/cmos.layout
++++ b/src/mainboard/lenovo/x230/cmos.layout
+@@ -39,6 +39,10 @@ entries
+ 
+ # coreboot config options: northbridge
+ 432	3	e	11	gfx_uma_size
++425	3	e	13	max_mem_clock
++435	3	e	14	mem_cmdrate
++438	1	e	15	force_mem_training
++439	1	e	16	mem_srt
+ 
+ 440	8	h	0	volume
+ 
+@@ -94,6 +98,17 @@ enumerations
+ 12	0	Disable
+ 12	1	AC and battery
+ 12	2	AC only
++13	0	800MHZ
++13	1	933MHZ
++13	2	1066MHZ
++13	3	1200MHZ
++14	0	1T
++14	1	2T
++14	2	Auto
++15	0	Disable
++15	1	Enable
++16	0	Disable
++16	1	Enable
+ 
+ # -----------------------------------------------------------------
+ checksums
+diff --git a/src/northbridge/intel/sandybridge/raminit.c b/src/northbridge/intel/sandybridge/raminit.c
+index 1d4354c83d..39854adfcb 100644
+--- a/src/northbridge/intel/sandybridge/raminit.c
++++ b/src/northbridge/intel/sandybridge/raminit.c
+@@ -15,6 +15,7 @@
+ #include <southbridge/intel/bd82x6x/pch.h>
+ #include <cpu/x86/msr.h>
+ #include <types.h>
++#include <option.h>
+ 
+ #include "raminit_native.h"
+ #include "raminit_common.h"
+@@ -298,6 +299,7 @@ static void init_dram_ddr3(int s3resume, const u32 cpuid)
+ 	spd_raw_data spds[4];
+ 	size_t mrc_size;
+ 	ramctr_timing *ctrl_cached = NULL;
++	u8 force_mem_training;
+ 
+ 	MCHBAR32(SAPMCTL) |= 1;
+ 
+@@ -341,6 +343,12 @@ static void init_dram_ddr3(int s3resume, const u32 cpuid)
+ 		ctrl_cached = NULL;
+ 	}
+ 
++	if(get_option(&force_mem_training, "force_mem_training") == CB_SUCCESS) {
++		if(force_mem_training == 1) {
++			ctrl_cached = NULL;
++		}
++	}
++
+ 	if (s3resume && !ctrl_cached) {
+ 		/* S3 resume is impossible, reset to come up cleanly */
+ 		system_reset();
+diff --git a/src/northbridge/intel/sandybridge/raminit_common.c b/src/northbridge/intel/sandybridge/raminit_common.c
+index f33322da50..9dcde41847 100644
+--- a/src/northbridge/intel/sandybridge/raminit_common.c
++++ b/src/northbridge/intel/sandybridge/raminit_common.c
+@@ -11,6 +11,7 @@
+ #include <device/pci_def.h>
+ #include <delay.h>
+ #include <types.h>
++#include <option.h>
+ 
+ #include "raminit_native.h"
+ #include "raminit_common.h"
+@@ -789,10 +790,19 @@ static void dram_mr2(ramctr_timing *ctrl, u8 rank, int channel)
+ 	const u16 pasr = 0;
+ 	const u16 cwl = ctrl->CWL - 5;
+ 	const odtmap odt = get_ODT(ctrl, channel);
++	u8 cmos_srt;
+ 
+ 	int srt = 0;
+-	if (IS_IVY_CPU(ctrl->cpu) && ctrl->tCK >= TCK_1066MHZ)
+-		srt = ctrl->extended_temperature_range && !ctrl->auto_self_refresh;
++	if (IS_IVY_CPU(ctrl->cpu) && ctrl->tCK >= TCK_1066MHZ) {
++		if(get_option(&cmos_srt, "mem_srt") == CB_SUCCESS) {
++			if(cmos_srt == 1) {
++				srt = ctrl->extended_temperature_range && !ctrl->auto_self_refresh;
++			}
++			else {
++				srt = 0;
++			}
++		}
++	}
+ 
+ 	u16 mr2reg = 0;
+ 	mr2reg |= pasr;
+@@ -2222,7 +2232,7 @@ int command_training(ramctr_timing *ctrl)
+ 
+ 	FOR_ALL_POPULATED_CHANNELS {
+ 		int cmdrate, err;
+-
++		u8 mem_cmdrate;
+ 		/*
+ 		 * Dual DIMM per channel:
+ 		 * Issue:
+@@ -2240,6 +2250,18 @@ int command_training(ramctr_timing *ctrl)
+ 			/* XMP gives the CMD rate in clock ticks, not ns */
+ 			cmdrate = MIN(DIV_ROUND_UP(ctrl->tCMD, 256) - 1, 1);
+ 
++		if(get_option(&mem_cmdrate, "mem_cmdrate") == CB_SUCCESS) {
++			if(mem_cmdrate == 0) {
++				cmdrate = 0;
++			}
++			else if(mem_cmdrate == 1) {
++				cmdrate = 1;
++			}
++			else if(mem_cmdrate == 2) {
++			//"auto" use the value from XMP
++			}
++		}
++
+ 		for (; cmdrate < 2; cmdrate++) {
+ 			err = try_cmd_stretch(ctrl, channel, cmdrate << 1);
+ 
+diff --git a/src/northbridge/intel/sandybridge/raminit_native.c b/src/northbridge/intel/sandybridge/raminit_native.c
+index 0d581f5a57..7e4006de5b 100644
+--- a/src/northbridge/intel/sandybridge/raminit_native.c
++++ b/src/northbridge/intel/sandybridge/raminit_native.c
+@@ -10,6 +10,7 @@
+ #include <northbridge/intel/sandybridge/chip.h>
+ #include <stdbool.h>
+ #include <stdint.h>
++#include <option.h>
+ 
+ #include "raminit_native.h"
+ #include "raminit_common.h"
+@@ -266,11 +267,27 @@ static unsigned int get_mem_min_tck(void)
+ {
+ 	u32 reg32;
+ 	u8 rev;
++	u8 max_mem_clock;
+ 	const struct northbridge_intel_sandybridge_config *cfg = NULL;
+ 
+ 	/* Actually, config of MCH or Host Bridge */
+ 	cfg = config_of_soc();
+ 
++	if(get_option(&max_mem_clock, "max_mem_clock") == CB_SUCCESS) {
++		if(max_mem_clock == 0) {
++			return TCK_800MHZ;
++		}
++		else if(max_mem_clock == 1) {
++			return TCK_933MHZ;
++		}
++		else if(max_mem_clock == 2) {
++			return TCK_1066MHZ;
++		}
++		else if(max_mem_clock == 3) {
++			return TCK_1200MHZ;
++		}
++	}
++
+ 	/* If non-zero, it was set in the devicetree */
+ 	if (cfg->max_mem_clock_mhz) {
+ 
+-- 
+2.29.2
+
