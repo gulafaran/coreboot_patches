@@ -1,15 +1,15 @@
-From 6d50618f0cc5a57d4d4c252d5adcb0b27b76751e Mon Sep 17 00:00:00 2001
+From b9e8905cb264e9f8506507ceb7edfb3a78206d6b Mon Sep 17 00:00:00 2001
 From: Tom Englund <tomenglund26@gmail.com>
-Date: Mon, 14 Dec 2020 21:05:32 +0100
-Subject: [PATCH] add cmos options for ram settings
+Date: Tue, 15 Dec 2020 05:06:09 +0100
+Subject: [PATCH] add cmdrate and max mem clocks to cmos
 
 ---
  src/mainboard/lenovo/x230/cmos.default        |  5 ++++
- src/mainboard/lenovo/x230/cmos.layout         | 15 ++++++++++
+ src/mainboard/lenovo/x230/cmos.layout         | 11 ++++++++
  src/northbridge/intel/sandybridge/raminit.c   |  8 ++++++
  .../intel/sandybridge/raminit_common.c        | 28 +++++++++++++++++--
  .../intel/sandybridge/raminit_native.c        | 17 +++++++++++
- 5 files changed, 70 insertions(+), 3 deletions(-)
+ 5 files changed, 66 insertions(+), 3 deletions(-)
 
 diff --git a/src/mainboard/lenovo/x230/cmos.default b/src/mainboard/lenovo/x230/cmos.default
 index 5c19d0f4a5..c680cba3bc 100644
@@ -25,7 +25,7 @@ index 5c19d0f4a5..c680cba3bc 100644
 +mem_srt=Enable
 +force_mem_training=Disable
 diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
-index 89891bf0b0..41d819410d 100644
+index 89891bf0b0..4755e07823 100644
 --- a/src/mainboard/lenovo/x230/cmos.layout
 +++ b/src/mainboard/lenovo/x230/cmos.layout
 @@ -39,6 +39,10 @@ entries
@@ -34,12 +34,12 @@ index 89891bf0b0..41d819410d 100644
  432	3	e	11	gfx_uma_size
 +425	3	e	13	max_mem_clock
 +435	3	e	14	mem_cmdrate
-+438	1	e	15	force_mem_training
-+439	1	e	16	mem_srt
++438	1	e	1	force_mem_training
++439	1	e	1	mem_srt
  
  440	8	h	0	volume
  
-@@ -94,6 +98,17 @@ enumerations
+@@ -94,6 +98,13 @@ enumerations
  12	0	Disable
  12	1	AC and battery
  12	2	AC only
@@ -50,10 +50,6 @@ index 89891bf0b0..41d819410d 100644
 +14	0	1T
 +14	1	2T
 +14	2	Auto
-+15	0	Disable
-+15	1	Enable
-+16	0	Disable
-+16	1	Enable
  
  # -----------------------------------------------------------------
  checksums

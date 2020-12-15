@@ -1,15 +1,15 @@
-From 3931d5e961e054e95033a795f40ca6e18ed66017 Mon Sep 17 00:00:00 2001
+From 8f0a222f5ad6ebfa31355df54d86d0dcb94e3c6f Mon Sep 17 00:00:00 2001
 From: Tom Englund <tomenglund26@gmail.com>
-Date: Mon, 14 Dec 2020 22:03:04 +0100
-Subject: [PATCH] add turbo limit overclocking
+Date: Tue, 15 Dec 2020 05:08:43 +0100
+Subject: [PATCH] add turbo tdp limit overclock to cmos
 
 ---
  src/cpu/intel/model_206ax/Kconfig            |  3 +
  src/cpu/intel/model_206ax/model_206ax.h      |  1 +
  src/cpu/intel/model_206ax/model_206ax_init.c | 63 ++++++++++++++++++++
  src/mainboard/lenovo/x230/cmos.default       |  1 +
- src/mainboard/lenovo/x230/cmos.layout        |  3 +
- 5 files changed, 71 insertions(+)
+ src/mainboard/lenovo/x230/cmos.layout        |  1 +
+ 5 files changed, 69 insertions(+)
 
 diff --git a/src/cpu/intel/model_206ax/Kconfig b/src/cpu/intel/model_206ax/Kconfig
 index 5098ac76d5..ab5dbe808e 100644
@@ -140,26 +140,17 @@ index c680cba3bc..3cbdd20d1b 100644
  force_mem_training=Disable
 +turbo_overclock=Disable
 diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
-index 41d819410d..9514e5aaf0 100644
+index 4755e07823..074f05c369 100644
 --- a/src/mainboard/lenovo/x230/cmos.layout
 +++ b/src/mainboard/lenovo/x230/cmos.layout
 @@ -43,6 +43,7 @@ entries
  435	3	e	14	mem_cmdrate
- 438	1	e	15	force_mem_training
- 439	1	e	16	mem_srt
-+428	1	e	17	turbo_overclock
+ 438	1	e	1	force_mem_training
+ 439	1	e	1	mem_srt
++428	1	e	1	turbo_overclock
  
  440	8	h	0	volume
  
-@@ -109,6 +110,8 @@ enumerations
- 15	1	Enable
- 16	0	Disable
- 16	1	Enable
-+17	0	Disable
-+17	1	Enable
- 
- # -----------------------------------------------------------------
- checksums
 -- 
 2.29.2
 
