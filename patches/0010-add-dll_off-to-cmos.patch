@@ -1,0 +1,53 @@
+From e33f64ee7cce1597a4ff7ebd5de7cf5d48a478be Mon Sep 17 00:00:00 2001
+From: Tom Englund <tomenglund26@gmail.com>
+Date: Sat, 26 Dec 2020 09:24:57 +0100
+Subject: [PATCH] add dll_off to cmos
+
+---
+ src/mainboard/lenovo/x230/cmos.default             | 1 +
+ src/mainboard/lenovo/x230/cmos.layout              | 1 +
+ src/northbridge/intel/sandybridge/raminit_common.c | 7 +++++++
+ 3 files changed, 9 insertions(+)
+
+diff --git a/src/mainboard/lenovo/x230/cmos.default b/src/mainboard/lenovo/x230/cmos.default
+index 9e84f9acc2..c46f18fa8f 100644
+--- a/src/mainboard/lenovo/x230/cmos.default
++++ b/src/mainboard/lenovo/x230/cmos.default
+@@ -24,3 +24,4 @@ turbo_overclock=Disable
+ plot_ram_training=Disable
+ trwdrdd=Auto
+ trwsr=Auto
++dll_off=Disable
+diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
+index 5b330558d4..873264be39 100644
+--- a/src/mainboard/lenovo/x230/cmos.layout
++++ b/src/mainboard/lenovo/x230/cmos.layout
+@@ -47,6 +47,7 @@ entries
+ 429	1	e	1	plot_ram_training
+ 449	3	e	15	trwdrdd
+ 452	3	e	15	trwsr
++455	1	e	1	dll_off
+ 
+ 440	8	h	0	volume
+ 
+diff --git a/src/northbridge/intel/sandybridge/raminit_common.c b/src/northbridge/intel/sandybridge/raminit_common.c
+index faeee8b527..f9a9a4a2fa 100644
+--- a/src/northbridge/intel/sandybridge/raminit_common.c
++++ b/src/northbridge/intel/sandybridge/raminit_common.c
+@@ -687,6 +687,13 @@ static void write_mrreg(ramctr_timing *ctrl, int channel, int slotrank, int reg,
+ /* Obtain optimal power down mode for current configuration */
+ static enum pdwm_mode get_power_down_mode(ramctr_timing *ctrl)
+ {
++	u8 cmos_dll_off;
++	if(get_option(&cmos_dll_off, "dll_off") == CB_SUCCESS) {
++		if(cmos_dll_off == 0) {
++			return PDM_NONE;
++		}
++	}
++
+ 	if (ctrl->tXP > 8)
+ 		return PDM_NONE;
+ 
+-- 
+2.29.2
+

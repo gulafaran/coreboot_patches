@@ -1,0 +1,72 @@
+From 6f6c389db0d89649353b63bd365ef285b1a75bd8 Mon Sep 17 00:00:00 2001
+From: Tom Englund <tomenglund26@gmail.com>
+Date: Sat, 26 Dec 2020 09:45:09 +0100
+Subject: [PATCH] add onboard vga primary to cmos
+
+---
+ src/device/device.c                    | 9 +++++++++
+ src/mainboard/lenovo/x230/cmos.default | 1 +
+ src/mainboard/lenovo/x230/cmos.layout  | 1 +
+ 3 files changed, 11 insertions(+)
+
+diff --git a/src/device/device.c b/src/device/device.c
+index ffdfeac22c..5cf7aaeece 100644
+--- a/src/device/device.c
++++ b/src/device/device.c
+@@ -12,6 +12,8 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <smp/spinlock.h>
++#include <option.h>
++
+ #if ENV_X86
+ #include <arch/ebda.h>
+ #endif
+@@ -194,6 +196,7 @@ static void set_vga_bridge_bits(void)
+ 	/* FIXME: Handle the VGA palette snooping. */
+ 	struct device *dev, *vga, *vga_onboard;
+ 	struct bus *bus;
++	u8 cmos_vga_primary;
+ 
+ 	bus = 0;
+ 	vga = 0;
+@@ -223,6 +226,12 @@ static void set_vga_bridge_bits(void)
+ 	if (!vga)
+ 		vga = vga_onboard;
+ 
++	if(get_option(&cmos_vga_primary, "onboard_vga_primary") == CB_SUCCESS) {
++		if(cmos_vga_primary == 1 && vga_onboard) {
++			vga = vga_onboard;
++		}
++	}
++
+ 	if (CONFIG(ONBOARD_VGA_IS_PRIMARY) && vga_onboard)
+ 		vga = vga_onboard;
+ 
+diff --git a/src/mainboard/lenovo/x230/cmos.default b/src/mainboard/lenovo/x230/cmos.default
+index c46f18fa8f..17d20e69d2 100644
+--- a/src/mainboard/lenovo/x230/cmos.default
++++ b/src/mainboard/lenovo/x230/cmos.default
+@@ -22,6 +22,7 @@ mem_srt=Enable
+ force_mem_training=Disable
+ turbo_overclock=Disable
+ plot_ram_training=Disable
++onboard_vga_primary=Disable
+ trwdrdd=Auto
+ trwsr=Auto
+ dll_off=Disable
+diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
+index 873264be39..dabbe05e17 100644
+--- a/src/mainboard/lenovo/x230/cmos.layout
++++ b/src/mainboard/lenovo/x230/cmos.layout
+@@ -45,6 +45,7 @@ entries
+ 439	1	e	1	mem_srt
+ 428	1	e	1	turbo_overclock
+ 429	1	e	1	plot_ram_training
++430	1	e	1	onboard_vga_primary
+ 449	3	e	15	trwdrdd
+ 452	3	e	15	trwsr
+ 455	1	e	1	dll_off
+-- 
+2.29.2
+
