@@ -1,6 +1,6 @@
-From e33f64ee7cce1597a4ff7ebd5de7cf5d48a478be Mon Sep 17 00:00:00 2001
+From a2c5b798b1b75b74b89a85cb78b8e6d4d93969ed Mon Sep 17 00:00:00 2001
 From: Tom Englund <tomenglund26@gmail.com>
-Date: Sat, 26 Dec 2020 09:24:57 +0100
+Date: Wed, 27 Jan 2021 10:22:16 +0100
 Subject: [PATCH] add dll_off to cmos
 
 ---
@@ -10,20 +10,20 @@ Subject: [PATCH] add dll_off to cmos
  3 files changed, 9 insertions(+)
 
 diff --git a/src/mainboard/lenovo/x230/cmos.default b/src/mainboard/lenovo/x230/cmos.default
-index 9e84f9acc2..c46f18fa8f 100644
+index 1c4f7fae43..308941a4aa 100644
 --- a/src/mainboard/lenovo/x230/cmos.default
 +++ b/src/mainboard/lenovo/x230/cmos.default
-@@ -24,3 +24,4 @@ turbo_overclock=Disable
- plot_ram_training=Disable
+@@ -23,3 +23,4 @@ force_mem_training=Disable
+ turbo_overclock=Disable
  trwdrdd=Auto
  trwsr=Auto
 +dll_off=Disable
 diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
-index 5b330558d4..873264be39 100644
+index 3370b7a9ff..06d047f1da 100644
 --- a/src/mainboard/lenovo/x230/cmos.layout
 +++ b/src/mainboard/lenovo/x230/cmos.layout
-@@ -47,6 +47,7 @@ entries
- 429	1	e	1	plot_ram_training
+@@ -46,6 +46,7 @@ entries
+ 428	1	e	1	turbo_overclock
  449	3	e	15	trwdrdd
  452	3	e	15	trwsr
 +455	1	e	1	dll_off
@@ -31,10 +31,10 @@ index 5b330558d4..873264be39 100644
  440	8	h	0	volume
  
 diff --git a/src/northbridge/intel/sandybridge/raminit_common.c b/src/northbridge/intel/sandybridge/raminit_common.c
-index faeee8b527..f9a9a4a2fa 100644
+index 795678ab19..4ce8605782 100644
 --- a/src/northbridge/intel/sandybridge/raminit_common.c
 +++ b/src/northbridge/intel/sandybridge/raminit_common.c
-@@ -687,6 +687,13 @@ static void write_mrreg(ramctr_timing *ctrl, int channel, int slotrank, int reg,
+@@ -688,6 +688,13 @@ static void write_mrreg(ramctr_timing *ctrl, int channel, int slotrank, int reg,
  /* Obtain optimal power down mode for current configuration */
  static enum pdwm_mode get_power_down_mode(ramctr_timing *ctrl)
  {
@@ -49,5 +49,5 @@ index faeee8b527..f9a9a4a2fa 100644
  		return PDM_NONE;
  
 -- 
-2.29.2
+2.30.0
 

@@ -1,33 +1,34 @@
-From 8f0a222f5ad6ebfa31355df54d86d0dcb94e3c6f Mon Sep 17 00:00:00 2001
+From 6352960df7677ccab321fc9290980e9b730ea726 Mon Sep 17 00:00:00 2001
 From: Tom Englund <tomenglund26@gmail.com>
-Date: Tue, 15 Dec 2020 05:08:43 +0100
-Subject: [PATCH] add turbo tdp limit overclock to cmos
+Date: Wed, 27 Jan 2021 09:56:58 +0100
+Subject: [PATCH] add turbo limit overclocking
 
 ---
- src/cpu/intel/model_206ax/Kconfig            |  3 +
+ src/cpu/intel/model_206ax/Kconfig            |  4 ++
  src/cpu/intel/model_206ax/model_206ax.h      |  1 +
- src/cpu/intel/model_206ax/model_206ax_init.c | 63 ++++++++++++++++++++
+ src/cpu/intel/model_206ax/model_206ax_init.c | 54 ++++++++++++++++++++
  src/mainboard/lenovo/x230/cmos.default       |  1 +
  src/mainboard/lenovo/x230/cmos.layout        |  1 +
- 5 files changed, 69 insertions(+)
+ 5 files changed, 61 insertions(+)
 
 diff --git a/src/cpu/intel/model_206ax/Kconfig b/src/cpu/intel/model_206ax/Kconfig
-index 5098ac76d5..ab5dbe808e 100644
+index 5098ac76d5..b0e811fa5c 100644
 --- a/src/cpu/intel/model_206ax/Kconfig
 +++ b/src/cpu/intel/model_206ax/Kconfig
-@@ -35,4 +35,7 @@ config MAX_CPUS
+@@ -35,4 +35,8 @@ config MAX_CPUS
  	int
  	default 8
  
 +config FORCE_MAX_TURBO_RATIO
 +	bool "Force turbo ratios to the maximum possible value"
 +	default n
++
  endif
 diff --git a/src/cpu/intel/model_206ax/model_206ax.h b/src/cpu/intel/model_206ax/model_206ax.h
-index b6e2d65e96..ceda2b9803 100644
+index 04e463934a..7060946846 100644
 --- a/src/cpu/intel/model_206ax/model_206ax.h
 +++ b/src/cpu/intel/model_206ax/model_206ax.h
-@@ -18,6 +18,7 @@
+@@ -46,6 +46,7 @@
  #define MSR_LT_LOCK_MEMORY		0x2e7
  #define MSR_PLATFORM_INFO		0xce
  #define  PLATFORM_INFO_SET_TDP		(1 << 29)
@@ -36,7 +37,7 @@ index b6e2d65e96..ceda2b9803 100644
  #define MSR_MISC_PWR_MGMT		0x1aa
  #define  MISC_PWR_MGMT_EIST_HW_DIS	(1 << 0)
 diff --git a/src/cpu/intel/model_206ax/model_206ax_init.c b/src/cpu/intel/model_206ax/model_206ax_init.c
-index 2afbfeecec..974f63e834 100644
+index 31099fd486..aada8875bc 100644
 --- a/src/cpu/intel/model_206ax/model_206ax_init.c
 +++ b/src/cpu/intel/model_206ax/model_206ax_init.c
 @@ -14,11 +14,13 @@
@@ -53,7 +54,7 @@ index 2afbfeecec..974f63e834 100644
  
  /*
   * List of supported C-states in this processor
-@@ -422,8 +424,62 @@ static void model_206ax_report(void)
+@@ -422,8 +424,53 @@ static void model_206ax_report(void)
  	printk(BIOS_INFO, "CPU: VT %ssupported\n", mode[vt]);
  }
  
@@ -70,13 +71,11 @@ index 2afbfeecec..974f63e834 100644
 +static void xe_init(void)
 +{
 +	msr_t msr;
-+
 +	/* If overclocking is not enabled, do not touch anything */
 +	if (!CONFIG(FORCE_MAX_TURBO_RATIO)) {
 +		printk(BIOS_DEBUG, "XE: not overriding Turbo Ratio limits\n");
 +		return;
 +	}
-+
 +	/*
 +	 * Get the number of OC bins for this processor.
 +	 *
@@ -84,29 +83,22 @@ index 2afbfeecec..974f63e834 100644
 +	 */
 +	msr = rdmsr(MSR_FLEX_RATIO);
 +	const uint8_t oc_bins = (msr.lo >> 17) & 0x7;
-+
 +	/* Ensure that the preconditions for XE are true */
 +	msr = rdmsr(MSR_PLATFORM_INFO);
 +	if (!(cpuid_eax(1) >= 0x206a3 && (msr.lo & PLATFORM_INFO_RATIO_LIMIT) && oc_bins)) {
-+
 +		printk(BIOS_WARNING, "XE: Cannot configure XE on a non-XE processor\n");
 +		return;
 +	}
-+
 +	/* Obtain maximum non-turbo ratio from MSR_PLATFORM_INFO */
 +	const uint8_t max_non_turbo = (msr.lo >> 8) & 0xff;
-+
 +	/* Now do the deed */
 +	msr = rdmsr(MSR_TURBO_RATIO_LIMIT);
-+
 +	msr.lo  = 0;
 +	msr.lo |= (max_non_turbo + oc_bins) <<  0;
 +	msr.lo |= (max_non_turbo + oc_bins) <<  8;
 +	msr.lo |= (max_non_turbo + oc_bins) << 16;
 +	msr.lo |= (max_non_turbo + oc_bins) << 24;
-+
 +	printk(BIOS_NOTICE, "XE: Setting Turbo Ratio to %d\n", max_non_turbo + oc_bins);
-+
 +	wrmsr(MSR_TURBO_RATIO_LIMIT, msr);
 +}
 +
@@ -114,9 +106,9 @@ index 2afbfeecec..974f63e834 100644
  {
 +	u8 turbo_overclock;
  
- 	/* Turn on caching if we haven't already */
- 	x86_enable_cache();
-@@ -466,6 +522,13 @@ static void model_206ax_init(struct device *cpu)
+ 	/* Clear out pending MCEs */
+ 	configure_mca();
+@@ -463,6 +510,13 @@ static void model_206ax_init(struct device *cpu)
  
  	/* Enable Turbo */
  	enable_turbo();
@@ -152,5 +144,5 @@ index 4755e07823..074f05c369 100644
  440	8	h	0	volume
  
 -- 
-2.29.2
+2.30.0
 

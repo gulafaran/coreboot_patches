@@ -1,6 +1,6 @@
-From 4d03d2349e97ffc4f5f431ff61b26ea10465db9b Mon Sep 17 00:00:00 2001
+From 90c59f6792f56f11fc48d010cad558cd085da73d Mon Sep 17 00:00:00 2001
 From: Tom Englund <tomenglund26@gmail.com>
-Date: Fri, 25 Dec 2020 19:42:00 +0100
+Date: Wed, 27 Jan 2021 10:13:30 +0100
 Subject: [PATCH] delay tRWSR on 1066
 
 ---
@@ -8,10 +8,10 @@ Subject: [PATCH] delay tRWSR on 1066
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/src/northbridge/intel/sandybridge/raminit_common.c b/src/northbridge/intel/sandybridge/raminit_common.c
-index 6589ff974d..8e35b5775c 100644
+index 97ad4b167c..ad9df0cea9 100644
 --- a/src/northbridge/intel/sandybridge/raminit_common.c
 +++ b/src/northbridge/intel/sandybridge/raminit_common.c
-@@ -3149,6 +3149,7 @@ void set_read_write_timings(ramctr_timing *ctrl)
+@@ -2839,6 +2839,7 @@ void set_read_write_timings(ramctr_timing *ctrl)
  {
  	/* Use a larger delay when running fast to improve stability */
  	const u32 tRWDRDD_inc = ctrl->tCK <= TCK_1066MHZ ? 4 : 2;
@@ -19,7 +19,7 @@ index 6589ff974d..8e35b5775c 100644
  
  	int channel, slotrank;
  
-@@ -3174,7 +3175,7 @@ void set_read_write_timings(ramctr_timing *ctrl)
+@@ -2864,7 +2865,7 @@ void set_read_write_timings(ramctr_timing *ctrl)
  			.tWWDD   = val,
  			.tRWDRDD = ctrl->ref_card_offset[channel] + tRWDRDD_inc,
  			.tWRDRDD = tWRDRDD,
@@ -29,5 +29,5 @@ index 6589ff974d..8e35b5775c 100644
  		};
  		MCHBAR32(TC_RWP_ch(channel)) = tc_rwp.raw;
 -- 
-2.29.2
+2.30.0
 

@@ -1,32 +1,32 @@
-From 304b97be9fe7092e37793a30a2b4b787784ddfaa Mon Sep 17 00:00:00 2001
+From 84dc51bd4a89ac54d10b714b8b2475f6b4c23c44 Mon Sep 17 00:00:00 2001
 From: Tom Englund <tomenglund26@gmail.com>
-Date: Sat, 26 Dec 2020 09:13:49 +0100
+Date: Wed, 27 Jan 2021 10:18:38 +0100
 Subject: [PATCH] add trwsr and trwdrdd to cmos
 
 ---
  src/mainboard/lenovo/x230/cmos.default        |  2 ++
  src/mainboard/lenovo/x230/cmos.layout         | 13 ++++++++--
- .../intel/sandybridge/raminit_common.c        | 25 ++++++++++++++++---
- 3 files changed, 35 insertions(+), 5 deletions(-)
+ .../intel/sandybridge/raminit_common.c        | 24 +++++++++++++++++--
+ 3 files changed, 35 insertions(+), 4 deletions(-)
 
 diff --git a/src/mainboard/lenovo/x230/cmos.default b/src/mainboard/lenovo/x230/cmos.default
-index d5af3dba4b..9e84f9acc2 100644
+index 3cbdd20d1b..1c4f7fae43 100644
 --- a/src/mainboard/lenovo/x230/cmos.default
 +++ b/src/mainboard/lenovo/x230/cmos.default
-@@ -22,3 +22,5 @@ mem_srt=Enable
+@@ -21,3 +21,5 @@ mem_cmdrate=Auto
+ mem_srt=Enable
  force_mem_training=Disable
  turbo_overclock=Disable
- plot_ram_training=Disable
 +trwdrdd=Auto
 +trwsr=Auto
 diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
-index 2adb392c9d..5b330558d4 100644
+index 074f05c369..3370b7a9ff 100644
 --- a/src/mainboard/lenovo/x230/cmos.layout
 +++ b/src/mainboard/lenovo/x230/cmos.layout
-@@ -45,11 +45,13 @@ entries
+@@ -44,11 +44,13 @@ entries
+ 438	1	e	1	force_mem_training
  439	1	e	1	mem_srt
  428	1	e	1	turbo_overclock
- 429	1	e	1	plot_ram_training
 +449	3	e	15	trwdrdd
 +452	3	e	15	trwsr
  
@@ -38,7 +38,7 @@ index 2adb392c9d..5b330558d4 100644
  
  # SandyBridge MRC Scrambler Seed values
  896	32	r	0	mrc_scrambler_seed
-@@ -107,8 +109,15 @@ enumerations
+@@ -106,8 +108,15 @@ enumerations
  14	0	1T
  14	1	2T
  14	2	Auto
@@ -56,14 +56,13 @@ index 2adb392c9d..5b330558d4 100644
 -checksum 392 447 984
 +checksum 392 455 984
 diff --git a/src/northbridge/intel/sandybridge/raminit_common.c b/src/northbridge/intel/sandybridge/raminit_common.c
-index 8e35b5775c..faeee8b527 100644
+index ad9df0cea9..795678ab19 100644
 --- a/src/northbridge/intel/sandybridge/raminit_common.c
 +++ b/src/northbridge/intel/sandybridge/raminit_common.c
-@@ -3147,9 +3147,28 @@ void prepare_training(ramctr_timing *ctrl)
- 
+@@ -2838,8 +2838,28 @@ void prepare_training(ramctr_timing *ctrl)
  void set_read_write_timings(ramctr_timing *ctrl)
  {
--	/* Use a larger delay when running fast to improve stability */
+ 	/* Use a larger delay when running fast to improve stability */
 -	const u32 tRWDRDD_inc = ctrl->tCK <= TCK_1066MHZ ? 4 : 2;
 -	const u32 tRWSR_inc = ctrl->tCK <= TCK_1066MHZ ? 4 : 2;
 +	u32 tRWDRDD_inc = ctrl->tCK <= TCK_1066MHZ ? 4 : 2;
@@ -92,5 +91,5 @@ index 8e35b5775c..faeee8b527 100644
  	int channel, slotrank;
  
 -- 
-2.29.2
+2.30.0
 

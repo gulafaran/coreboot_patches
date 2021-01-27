@@ -1,6 +1,6 @@
-From 6f6c389db0d89649353b63bd365ef285b1a75bd8 Mon Sep 17 00:00:00 2001
+From d39339f780438f35fcf8b83b1bc4e9f1be56a619 Mon Sep 17 00:00:00 2001
 From: Tom Englund <tomenglund26@gmail.com>
-Date: Sat, 26 Dec 2020 09:45:09 +0100
+Date: Wed, 27 Jan 2021 10:26:47 +0100
 Subject: [PATCH] add onboard vga primary to cmos
 
 ---
@@ -44,29 +44,26 @@ index ffdfeac22c..5cf7aaeece 100644
  		vga = vga_onboard;
  
 diff --git a/src/mainboard/lenovo/x230/cmos.default b/src/mainboard/lenovo/x230/cmos.default
-index c46f18fa8f..17d20e69d2 100644
+index 308941a4aa..67ce95a44b 100644
 --- a/src/mainboard/lenovo/x230/cmos.default
 +++ b/src/mainboard/lenovo/x230/cmos.default
-@@ -22,6 +22,7 @@ mem_srt=Enable
- force_mem_training=Disable
- turbo_overclock=Disable
- plot_ram_training=Disable
-+onboard_vga_primary=Disable
+@@ -24,3 +24,4 @@ turbo_overclock=Disable
  trwdrdd=Auto
  trwsr=Auto
  dll_off=Disable
++onboard_vga_primary=Disable
 diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
-index 873264be39..dabbe05e17 100644
+index 06d047f1da..3bef02f85d 100644
 --- a/src/mainboard/lenovo/x230/cmos.layout
 +++ b/src/mainboard/lenovo/x230/cmos.layout
-@@ -45,6 +45,7 @@ entries
+@@ -44,6 +44,7 @@ entries
+ 438	1	e	1	force_mem_training
  439	1	e	1	mem_srt
  428	1	e	1	turbo_overclock
- 429	1	e	1	plot_ram_training
 +430	1	e	1	onboard_vga_primary
  449	3	e	15	trwdrdd
  452	3	e	15	trwsr
  455	1	e	1	dll_off
 -- 
-2.29.2
+2.30.0
 

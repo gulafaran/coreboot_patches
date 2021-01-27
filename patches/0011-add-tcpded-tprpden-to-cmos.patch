@@ -1,0 +1,97 @@
+From 91f2093bc954dea4e2276d83fd10d1edc10748f1 Mon Sep 17 00:00:00 2001
+From: Tom Englund <tomenglund26@gmail.com>
+Date: Wed, 27 Jan 2021 10:30:58 +0100
+Subject: [PATCH] add tcpded/tprpden to cmos
+
+---
+ src/mainboard/lenovo/x230/cmos.default        |  2 ++
+ src/mainboard/lenovo/x230/cmos.layout         |  4 ++-
+ .../intel/sandybridge/raminit_common.c        | 31 +++++++++++++++++--
+ 3 files changed, 34 insertions(+), 3 deletions(-)
+
+diff --git a/src/mainboard/lenovo/x230/cmos.default b/src/mainboard/lenovo/x230/cmos.default
+index 67ce95a44b..4c6486c185 100644
+--- a/src/mainboard/lenovo/x230/cmos.default
++++ b/src/mainboard/lenovo/x230/cmos.default
+@@ -25,3 +25,5 @@ trwdrdd=Auto
+ trwsr=Auto
+ dll_off=Disable
+ onboard_vga_primary=Disable
++tcpded=Auto
++tprpden=Auto
+diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
+index 3bef02f85d..b6d1cac394 100644
+--- a/src/mainboard/lenovo/x230/cmos.layout
++++ b/src/mainboard/lenovo/x230/cmos.layout
+@@ -48,6 +48,8 @@ entries
+ 449	3	e	15	trwdrdd
+ 452	3	e	15	trwsr
+ 455	1	e	1	dll_off
++456	3	e	15	tcpded
++460	3	e	15	tprpden
+ 
+ 440	8	h	0	volume
+ 
+@@ -121,4 +123,4 @@ enumerations
+ # -----------------------------------------------------------------
+ checksums
+ 
+-checksum 392 455 984
++checksum 392 559 984
+diff --git a/src/northbridge/intel/sandybridge/raminit_common.c b/src/northbridge/intel/sandybridge/raminit_common.c
+index 4ce8605782..6aa1bd0e66 100644
+--- a/src/northbridge/intel/sandybridge/raminit_common.c
++++ b/src/northbridge/intel/sandybridge/raminit_common.c
+@@ -150,6 +150,20 @@ static void dram_odt_stretch(ramctr_timing *ctrl, int channel)
+ void dram_timing_regs(ramctr_timing *ctrl)
+ {
+ 	int channel;
++	u8 cmos_tcpded = 0;
++	u8 cmos_tprpden = 0;
++
++	if(get_option(&cmos_tcpded, "tcpded") == CB_SUCCESS) {
++		if(cmos_tcpded == 0) {
++			printk(RAM_DEBUG, "tcpded set to Auto, using defaults.\n");
++		}
++	}
++
++	if(get_option(&cmos_tprpden, "tprpden") == CB_SUCCESS) {
++		if(cmos_tprpden == 0) {
++			printk(RAM_DEBUG, "tprpden set to Auto, using defaults.\n");
++		}
++	}
+ 
+ 	/* BIN parameters */
+ 	const union tc_dbp_reg tc_dbp = {
+@@ -171,13 +185,26 @@ void dram_timing_regs(ramctr_timing *ctrl)
+ 		.tCMD = 3,
+ 	};
+ 
++	u32 tcpded_default = 2;
++	u32 tprpden_default = 1;
++
++	if(cmos_tcpded > 0) {
++		tcpded_default = cmos_tcpded;
++	}
++	if(cmos_tprpden > 0) {
++		tprpden_default = cmos_tprpden;
++	}
++
++	printk(RAM_DEBUG, "tcpded set to %x .\n", tcpded_default);
++	printk(RAM_DEBUG, "tprpden set to %x .\n", tprpden_default);
++
+ 	/* Other parameters */
+ 	const union tc_othp_reg tc_othp = {
+ 		.tXPDLL  = ctrl->tXPDLL,
+ 		.tXP     = ctrl->tXP,
+ 		.tAONPD  = ctrl->tAONPD,
+-		.tCPDED  = 2,
+-		.tPRPDEN = 1,
++		.tCPDED  = tcpded_default,
++		.tPRPDEN = tprpden_default,
+ 	};
+ 
+ 	/*
+-- 
+2.30.0
+
