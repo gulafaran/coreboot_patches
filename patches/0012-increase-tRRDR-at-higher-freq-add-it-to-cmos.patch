@@ -1,0 +1,76 @@
+From 7f4c42207b3dff2f7736fcf700bee19c0c92be23 Mon Sep 17 00:00:00 2001
+From: Tom Englund <tomenglund26@gmail.com>
+Date: Sat, 30 Jan 2021 09:49:14 +0100
+Subject: [PATCH] increase tRRDR at higher freq, add it to cmos
+
+---
+ src/mainboard/lenovo/x230/cmos.default             |  1 +
+ src/mainboard/lenovo/x230/cmos.layout              |  1 +
+ src/northbridge/intel/sandybridge/raminit_common.c | 14 +++++++++++++-
+ 3 files changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/src/mainboard/lenovo/x230/cmos.default b/src/mainboard/lenovo/x230/cmos.default
+index 4c6486c185..6d0c1cea01 100644
+--- a/src/mainboard/lenovo/x230/cmos.default
++++ b/src/mainboard/lenovo/x230/cmos.default
+@@ -27,3 +27,4 @@ dll_off=Disable
+ onboard_vga_primary=Disable
+ tcpded=Auto
+ tprpden=Auto
++trrdr=Auto
+diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
+index b6d1cac394..9da9123b8f 100644
+--- a/src/mainboard/lenovo/x230/cmos.layout
++++ b/src/mainboard/lenovo/x230/cmos.layout
+@@ -50,6 +50,7 @@ entries
+ 455	1	e	1	dll_off
+ 456	3	e	15	tcpded
+ 460	3	e	15	tprpden
++464	3	e	15	trrdr
+ 
+ 440	8	h	0	volume
+ 
+diff --git a/src/northbridge/intel/sandybridge/raminit_common.c b/src/northbridge/intel/sandybridge/raminit_common.c
+index 6aa1bd0e66..289de9e637 100644
+--- a/src/northbridge/intel/sandybridge/raminit_common.c
++++ b/src/northbridge/intel/sandybridge/raminit_common.c
+@@ -2874,8 +2874,11 @@ void set_read_write_timings(ramctr_timing *ctrl)
+ 	/* Use a larger delay when running fast to improve stability */
+ 	u32 tRWDRDD_inc = ctrl->tCK <= TCK_1066MHZ ? 4 : 2;
+ 	u32 tRWSR_inc = ctrl->tCK <= TCK_1066MHZ ? 4 : 2;
++	u32 tRRDR_inc = ctrl->tCK <= TCK_1066MHZ ? 1 : 0;
++
+ 	u8 tRWDRDD_cmos = 0;
+ 	u8 tRWSR_cmos = 0;
++	u8 tRRDR_cmos = 0;
+ 
+ 	if(get_option(&tRWDRDD_cmos, "trwdrdd") == CB_SUCCESS) {
+ 		if(tRWDRDD_cmos > 0) {
+@@ -2895,6 +2898,15 @@ void set_read_write_timings(ramctr_timing *ctrl)
+ 		printk(BIOS_DEBUG, "Didnt find tRWSR in cmos, sticking to defaults.\n");
+ 	}
+ 
++	if(get_option(&tRRDR_cmos, "trrdr") == CB_SUCCESS) {
++		if(tRRDR_cmos > 0) {
++			tRRDR_inc = tRRDR_cmos;
++		}
++	}
++	else {
++		printk(BIOS_DEBUG, "Didnt find tRWSR in cmos, sticking to defaults.\n");
++	}
++
+ 	int channel, slotrank;
+ 
+ 	FOR_ALL_POPULATED_CHANNELS {
+@@ -2913,7 +2925,7 @@ void set_read_write_timings(ramctr_timing *ctrl)
+ 		dram_odt_stretch(ctrl, channel);
+ 
+ 		const union tc_rwp_reg tc_rwp = {
+-			.tRRDR   = 0,
++			.tRRDR   = tRRDR_inc,
+ 			.tRRDD   = val,
+ 			.tWWDR   = val,
+ 			.tWWDD   = val,
+-- 
+2.30.0
+

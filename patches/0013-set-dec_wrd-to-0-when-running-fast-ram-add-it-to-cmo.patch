@@ -1,0 +1,85 @@
+From 437f062923f3e6bb801ce18b2ad03830a1aae847 Mon Sep 17 00:00:00 2001
+From: Tom Englund <tomenglund26@gmail.com>
+Date: Sat, 30 Jan 2021 14:02:23 +0100
+Subject: [PATCH] set dec_wrd to 0 when running fast ram, add it to cmos
+
+---
+ src/mainboard/lenovo/x230/cmos.default        |  1 +
+ src/mainboard/lenovo/x230/cmos.layout         |  1 +
+ .../intel/sandybridge/raminit_common.c        | 21 ++++++++++++++-----
+ 3 files changed, 18 insertions(+), 5 deletions(-)
+
+diff --git a/src/mainboard/lenovo/x230/cmos.default b/src/mainboard/lenovo/x230/cmos.default
+index 6d0c1cea01..bd83d65dc5 100644
+--- a/src/mainboard/lenovo/x230/cmos.default
++++ b/src/mainboard/lenovo/x230/cmos.default
+@@ -28,3 +28,4 @@ onboard_vga_primary=Disable
+ tcpded=Auto
+ tprpden=Auto
+ trrdr=Auto
++dec_wrd=Auto
+diff --git a/src/mainboard/lenovo/x230/cmos.layout b/src/mainboard/lenovo/x230/cmos.layout
+index 9da9123b8f..0dcd99d67f 100644
+--- a/src/mainboard/lenovo/x230/cmos.layout
++++ b/src/mainboard/lenovo/x230/cmos.layout
+@@ -51,6 +51,7 @@ entries
+ 456	3	e	15	tcpded
+ 460	3	e	15	tprpden
+ 464	3	e	15	trrdr
++468	3	e	15	dec_wrd
+ 
+ 440	8	h	0	volume
+ 
+diff --git a/src/northbridge/intel/sandybridge/raminit_common.c b/src/northbridge/intel/sandybridge/raminit_common.c
+index 289de9e637..3ca41b3a50 100644
+--- a/src/northbridge/intel/sandybridge/raminit_common.c
++++ b/src/northbridge/intel/sandybridge/raminit_common.c
+@@ -2872,13 +2872,15 @@ void prepare_training(ramctr_timing *ctrl)
+ void set_read_write_timings(ramctr_timing *ctrl)
+ {
+ 	/* Use a larger delay when running fast to improve stability */
+-	u32 tRWDRDD_inc = ctrl->tCK <= TCK_1066MHZ ? 4 : 2;
+-	u32 tRWSR_inc = ctrl->tCK <= TCK_1066MHZ ? 4 : 2;
+-	u32 tRRDR_inc = ctrl->tCK <= TCK_1066MHZ ? 1 : 0;
++	u32 tRWDRDD_inc = ctrl->tCK <= TCK_933MHZ ? 4 : 2;
++	u32 tRWSR_inc = ctrl->tCK <= TCK_933MHZ ? 4 : 2;
++	u32 tRRDR_inc = ctrl->tCK <= TCK_933MHZ ? 1 : 0;
++	u32 dec_wrd_inc = ctrl->tCK <= TCK_933MHZ ? 1 : 0;
+ 
+ 	u8 tRWDRDD_cmos = 0;
+ 	u8 tRWSR_cmos = 0;
+ 	u8 tRRDR_cmos = 0;
++	u8 dec_wrd_cmos = 0;
+ 
+ 	if(get_option(&tRWDRDD_cmos, "trwdrdd") == CB_SUCCESS) {
+ 		if(tRWDRDD_cmos > 0) {
+@@ -2904,7 +2906,16 @@ void set_read_write_timings(ramctr_timing *ctrl)
+ 		}
+ 	}
+ 	else {
+-		printk(BIOS_DEBUG, "Didnt find tRWSR in cmos, sticking to defaults.\n");
++		printk(BIOS_DEBUG, "Didnt find trrdr in cmos, sticking to defaults.\n");
++	}
++
++	if(get_option(&dec_wrd_cmos, "dec_wrd") == CB_SUCCESS) {
++		if(dec_wrd_cmos > 0) {
++			dec_wrd_inc = dec_wrd_cmos;
++		}
++	}
++	else {
++		printk(BIOS_DEBUG, "Didnt find dec_wrd in cmos, sticking to defaults.\n");
+ 	}
+ 
+ 	int channel, slotrank;
+@@ -2932,7 +2943,7 @@ void set_read_write_timings(ramctr_timing *ctrl)
+ 			.tRWDRDD = ctrl->ref_card_offset[channel] + tRWDRDD_inc,
+ 			.tWRDRDD = tWRDRDD,
+ 			.tRWSR   = tRWSR_inc,
+-			.dec_wrd = 1,
++			.dec_wrd = dec_wrd_inc,
+ 		};
+ 		MCHBAR32(TC_RWP_ch(channel)) = tc_rwp.raw;
+ 	}
+-- 
+2.30.0
+
